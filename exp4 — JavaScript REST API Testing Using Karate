@@ -1,0 +1,224 @@
+1. Install required software
+sudo apt update && sudo apt install nodejs npm openjdk-17-jdk maven -y
+
+Description: Installs Node.js, npm, Java 17 and Maven.
+
+Expected output:
+
+Setting up nodejs ...
+Setting up npm ...
+Setting up openjdk-17-jdk ...
+Setting up maven ...
+2. Verify installations
+node -v
+
+Description: Checks the Node.js version.
+
+Output:
+
+v18.x.x
+
+Then:
+
+java -version
+
+Description: Checks the Java version.
+
+Output:
+
+openjdk version "17.x.x"
+
+And:
+
+mvn -version
+
+Description: Checks the Maven installation.
+
+Output:
+
+Apache Maven 3.x.x
+Java version: 17.x.x
+3. Create JavaScript application
+mkdir -p ~/karate-js && cd ~/karate-js
+
+Description: Creates and opens the JavaScript project folder.
+
+Output:
+
+No output
+4. Initialize Node.js project
+npm init -y
+
+Description: Creates the Node.js package.json file.
+
+Output:
+
+Wrote to /home/ubuntu/karate-js/package.json
+5. Install Express
+npm install express
+
+Description: Installs Express to create the REST API.
+
+Output:
+
+added xx packages
+6. Create app.js
+
+You can use nano:
+
+nano app.js
+
+Description: Opens a file to create the JavaScript application.
+
+Paste:
+
+const express = require('express');
+
+const app = express();
+
+app.get('/hello', (req, res) => {
+    res.json({ message: "Hello from JavaScript!" });
+});
+
+app.listen(3000, () => {
+    console.log("Server running on port 3000");
+});
+
+Save:
+
+Ctrl + O → Enter → Ctrl + X
+
+7. Run JavaScript application 
+node app.js
+
+Description: Starts the Node.js REST API server.
+
+Output:
+
+Server running on port 3000
+Keep this terminal running.
+
+8. Test the JavaScript API
+
+Open a second terminal.
+
+curl http://localhost:3000/hello
+
+Description: Sends a GET request to the JavaScript REST API.
+
+Output:
+
+{"message":"Hello from JavaScript!"}
+This confirms your JavaScript API works.
+
+9. Create Karate testing project
+
+In the second terminal:
+
+cd ~/karate-js
+mkdir -p karate-test/src/test/java
+cd karate-test
+
+Description: Creates the Maven project structure for Karate testing.
+
+Output:
+
+No output
+10. Create pom.xml
+nano pom.xml
+
+Description: Creates the Maven configuration file for Karate.
+
+Paste:
+
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>karate-test</artifactId>
+    <version>1.0</version>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.intuit.karate</groupId>
+            <artifactId>karate-junit5</artifactId>
+            <version>1.4.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>
+
+Save:
+
+Ctrl + O → Enter → Ctrl + X
+
+11. Create Karate feature
+nano src/test/java/hello.feature
+
+Description: Creates the Karate test scenario.
+
+Paste:
+
+Feature: JavaScript API Testing
+
+Scenario: Test Hello API
+    Given url 'http://localhost:3000/hello'
+    When method GET
+    Then status 200
+    And match response.message == 'Hello from JavaScript!'
+
+Save:
+
+Ctrl + O → Enter → Ctrl + X
+
+12. Create KarateTest.java
+nano src/test/java/KarateTest.java
+
+Description: Creates the Java runner for the Karate test.
+
+Paste:
+
+import com.intuit.karate.junit5.Karate;
+
+class KarateTest {
+
+    @Karate.Test
+    Karate testHello() {
+        return Karate.run("hello").relativeTo(getClass());
+    }
+}
+
+Save:
+
+Ctrl + O → Enter → Ctrl + X
+
+13. Run automated test 
+
+Make sure Terminal 1 still has Node.js running:
+
+Server running on port 3000
+
+In Terminal 2, make sure you are here:
+
+~/karate-js/karate-test
+
+Then run:
+
+mvn test
+
+Description: Runs the Karate automated API test.
+
+Expected output:
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+
+Finally:
+
+BUILD SUCCESS
+Your test passed.
