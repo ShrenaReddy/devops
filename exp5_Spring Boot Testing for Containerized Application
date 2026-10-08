@@ -1,0 +1,99 @@
+Experiment 5 — Spring Boot Testing for Containerized Application
+ (Develop test cases for the above containerized application using Spring boot testing)
+
+Step 1: Create Spring Boot Project
+Open Spring Initializr and select:
+- Project: Maven
+- Language: Java
+- Java: 17
+- Dependency: Spring Web
+- Dependency: Spring Boot Starter Test
+Generate → Download → Extract → Open in VS Code.
+Step 2: Create REST API
+Create:
+src/main/java/com/example/demo/HelloController.java
+
+package com.example.demo;
+
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+public class HelloController {
+
+    @GetMapping("/hello")
+    public String hello() {
+        return "Hello from Docker!";
+    }
+}
+
+Step 3: Create Test Cases
+Create:
+src/test/java/com/example/demo/HelloControllerTest.java
+
+package com.example.demo;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class HelloControllerTest {
+
+    @LocalServerPort
+    private int port;
+
+    @Autowired
+    private TestRestTemplate restTemplate;
+
+    @Test
+    void testHelloAPI() {
+        String result = restTemplate.getForObject(
+                "http://localhost:" + port + "/hello",
+                String.class
+        );
+
+        assertEquals("Hello from Docker!", result);
+    }
+
+    @Test
+    void testStatus() {
+        var response = restTemplate.getForEntity(
+                "http://localhost:" + port + "/hello",
+                String.class
+        );
+
+        assertEquals(200, response.getStatusCode().value());
+    }
+}
+
+Step 4: Run Test Cases
+mvn test
+
+Step 5: Create Dockerfile
+Create:
+Dockerfile
+
+Add:
+FROM eclipse-temurin:17-jre
+COPY target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+
+Step 6: Build Spring Boot Application
+mvn clean package
+
+Step 7: Build Docker Image
+docker build -t springtest .
+
+Step 8: Run Docker Container
+docker run -d -p 8080:8080 --name testapp springtest
+
+Step 9: Test Docker Container
+curl http://localhost:8080/hello
+
+Step 10: Stop and Remove Container
+docker rm -f testapp
