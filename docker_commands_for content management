@@ -1,0 +1,77 @@
+Experiment 6 — Docker Commands: Steps to Execute
+Step 1: Check Docker
+docker --version
+docker info
+
+Step 2: Download Ubuntu Image
+docker pull ubuntu
+
+Step 3: List Images
+docker images
+
+Step 4: Remove Image
+docker rmi <image_id>
+
+Step 5: Create and Enter Ubuntu Container
+docker run -it ubuntu bash
+
+Step 6: Exit Container
+exit
+
+Step 7: Check Containers
+docker ps
+docker ps -a
+
+Step 8: Stop Container
+docker stop <container_id>
+
+Step 9: Start Container
+docker start <container_id>
+
+Step 10: Remove Container
+docker rm <container_id>
+
+Step 11: Create a File on Host
+echo "Hello Docker" > file.txt
+
+Step 12: Copy File into Container
+docker cp file.txt <container_id>:/tmp/
+
+Step 13: Enter Running Container
+docker exec -it <container_id> bash
+
+Step 14: Check File Inside Container
+cat /tmp/file.txt
+
+Step 15: Exit Container
+exit
+
+Step 16: Copy File Out of Container
+docker cp <container_id>:/tmp/file.txt .
+
+Step 17: View Container Logs
+docker logs <container_id>
+
+Step 18: Inspect Container
+docker inspect <container_id>
+
+Step 19: Create Volume
+docker volume create mydata
+
+Step 20: Run Container with Volume
+docker run -it -v mydata:/app/data ubuntu bash
+
+Step 21: Create Data in Volume
+echo "Docker Volume Data" > /app/data/test.txt
+
+Step 22: Check Volume Data
+cat /app/data/test.txt
+
+Step 23: Exit Container
+exit
+
+Step 24: List Volumes
+docker volume ls
+
+Step 25: Inspect Volume
+docker volume inspect mydata
