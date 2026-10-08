@@ -1,0 +1,93 @@
+Spring Boot + Karate API Testing — Steps Only
+Step 1: Install Java and Maven
+sudo apt update && sudo apt install openjdk-17-jdk maven -y
+
+Step 2: Check Java
+java -version
+
+Step 3: Check Maven
+mvn -version
+
+Step 4: Create Spring Boot Project
+Go to Spring Initializr and select:
+- Project: Maven
+- Language: Java
+- Java: 17
+- Dependency: Spring Web
+- Dependency: Spring Boot Starter Test
+Generate → Download ZIP → Extract → Open in VS Code.
+Step 5: Create HelloController.java
+Create:
+src/main/java/com/example/demo/HelloController.java
+
+Add:
+package com.example.demo;
+
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+public class HelloController {
+
+    @GetMapping("/hello")
+    public String hello() {
+        return "Hello from Spring Boot!";
+    }
+}
+
+Step 6: Run Spring Boot
+mvn spring-boot:run
+
+Step 7: Test REST API
+Open a second terminal:
+curl http://localhost:8080/hello
+
+Step 8: Add Karate Dependency
+Open pom.xml and add inside <dependencies>:
+<dependency>
+    <groupId>com.intuit.karate</groupId>
+    <artifactId>karate-junit5</artifactId>
+    <version>1.4.1</version>
+    <scope>test</scope>
+</dependency>
+
+Step 9: Create Test Folder
+mkdir -p src/test/java/com/example/demo
+
+Step 10: Create hello.feature
+Create:
+src/test/java/com/example/demo/hello.feature
+
+Add:
+Feature: Test Spring Boot API
+
+Scenario: Test Hello API
+    Given url 'http://localhost:8080/hello'
+    When method GET
+    Then status 200
+    And match response == 'Hello from Spring Boot!'
+
+Step 11: Create KarateTest.java
+Create:
+src/test/java/com/example/demo/KarateTest.java
+
+Add:
+package com.example.demo;
+
+import com.intuit.karate.junit5.Karate;
+
+class KarateTest {
+
+    @Karate.Test
+    Karate testHello() {
+        return Karate.run("hello").relativeTo(getClass());
+    }
+}
+
+Step 12: Run Automated Test
+Keep Spring Boot running in Terminal 1.
+In Terminal 2:
+mvn test
+
+Step 13: Verify
+Check for:
+BUILD SUCCESS
