@@ -1,0 +1,42 @@
+Step 1: Create and enter project folder
+mkdir docker-html-program
+cd docker-html-program
+
+Step 2: Create index.html
+nano index.html
+
+Enter:
+<html>
+<body>
+    <h1>Hello Docker Demonstration</h1>
+    <p>This is My first Docker containerized web application.</p>
+</body>
+</html>
+
+Save: Ctrl + O → Enter → Ctrl + X
+Step 3: Check HTML file
+cat index.html
+
+Step 4: Create Dockerfile
+nano Dockerfile
+
+Enter:
+FROM nginx
+COPY index.html /usr/share/nginx/html/
+
+Save: Ctrl + O → Enter → Ctrl + X
+Step 5: Build Docker image
+docker build -t myhtml .
+
+Step 6: Check Docker image
+docker images
+
+Step 7: Run Docker container
+docker run -d -p 8080:80 myhtml
+
+Step 8: Open the application
+Open in browser:
+http://localhost:8080
+
+Step 9: Check running container
+docker ps
