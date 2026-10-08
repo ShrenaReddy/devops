@@ -1,0 +1,54 @@
+Experiment 2 — Kubernetes Container Scaling
+Step 1: Start Kubernetes
+minikube start --driver=docker
+
+Step 2: Check the node
+kubectl get nodes
+
+Step 3: Go to the Docker application
+cd ~/docker-app
+
+Step 4: Build the Docker image
+minikube image build -t mywebapp:v1 .
+
+Step 5: Create Kubernetes Deployment
+kubectl create deployment mywebapp --image=mywebapp:v1
+
+Step 6: Set 2 replicas
+kubectl scale deployment mywebapp --replicas=2
+
+Step 7: Use the local Docker image
+kubectl patch deployment mywebapp -p '{"spec":{"template":{"spec":{"containers":[{"name":"mywebapp","image":"mywebapp:v1","imagePullPolicy":"Never"}]}}}}'
+
+Step 8: Verify Pods
+kubectl get pods
+
+Step 9: Verify Deployment
+kubectl get deployment
+
+Step 10: Expose the application
+kubectl expose deployment mywebapp --type=NodePort --port=80
+
+Step 11: Check the Service
+kubectl get service
+
+Step 12: Get application URL
+minikube service mywebapp --url
+
+Step 13: Test the application
+curl $(minikube service mywebapp --url)
+
+Step 14: Scale from 2 → 3 Pods
+kubectl scale deployment mywebapp --replicas=3
+
+Step 15: Verify 3 Pods
+kubectl get pods
+
+Step 16: Delete the Service
+kubectl delete service mywebapp
+
+Step 17: Delete the Deployment
+kubectl delete deployment mywebapp
+
+Step 18: Stop Minikube
+minikube stop
