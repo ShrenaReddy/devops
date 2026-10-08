@@ -1,1 +1,378 @@
+Step 1: Install Docker
 
+Command
+
+sudo apt update && sudo apt install docker.io -y
+
+One-line description: Updates Ubuntu packages and installs Docker.
+
+Expected output
+
+Reading package lists... Done
+...
+Setting up docker.io ...
+Processing triggers ...
+Step 2: Start and verify Docker
+
+Command
+
+sudo systemctl enable --now docker && docker --version
+
+One-line description: Starts Docker automatically and displays the installed Docker version.
+
+Expected output
+
+Docker version 28.x.x, build xxxxxxx
+
+Your exact version may be different. That's completely fine.
+
+Step 3: Install kubectl and Minikube
+Install kubectl
+sudo snap install kubectl --classic
+
+Description: Installs the Kubernetes command-line tool.
+
+Output
+
+kubectl 1.xx.x from Canonical installed
+
+Verify:
+
+kubectl version --client
+
+Output
+
+Client Version: v1.xx.x
+Install Minikube
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+Description: Downloads and installs Minikube.
+
+Verify:
+
+minikube version
+
+Output
+
+minikube version: v1.xx.x
+Step 4: Start Kubernetes
+minikube start --driver=docker
+
+One-line description: Creates and starts a Kubernetes cluster using Docker.
+
+Expected output
+
+😄  minikube v1.xx.x on Ubuntu
+✨  Using the docker driver
+📌  Using Docker driver
+🚀  Starting control plane node
+🌟  Enabled addons: storage-provisioner, default-storageclass
+🏄  Done! kubectl is now configured to use "minikube" cluster
+If you get Docker permission error
+
+Run:
+
+sudo usermod -aG docker $USER
+
+Description: Gives your Ubuntu user permission to use Docker without sudo.
+
+Then log out and log in again, and run:
+
+minikube start --driver=docker
+Step 5: Create the project
+mkdir ~/k8s-docker && cd ~/k8s-docker
+
+One-line description: Creates the project folder and enters it.
+
+Output
+
+No output
+Step 6: Create the HTML application
+
+Instead of opening nano, use this single command:
+
+echo '<h1>Hello from Docker and Kubernetes!</h1><p>DevOps Lab Experiment</p>' > index.html
+
+One-line description: Creates a simple HTML webpage.
+
+Output
+
+No output
+
+Check it:
+
+cat index.html
+
+Output
+
+<h1>Hello from Docker and Kubernetes!</h1><p>DevOps Lab Experiment</p>
+Step 7: Create Dockerfile
+
+Use this single command:
+
+cat > Dockerfile <<'EOF'
+FROM nginx:alpine
+COPY index.html /usr/share/nginx/html/index.html
+EXPOSE 80
+EOF
+
+One-line description: Creates a Dockerfile that runs the HTML page using Nginx.
+
+Output
+
+No output
+
+Check:
+
+cat Dockerfile
+
+Output
+
+FROM nginx:alpine
+COPY index.html /usr/share/nginx/html/index.html
+EXPOSE 80
+Step 8: Build the Docker image
+minikube image build -t myapp:v1 .
+
+One-line description: Builds the Docker image directly inside Minikube.
+
+Expected output
+
+[+] Building ...
+ => [internal] load build definition from Dockerfile
+ => [internal] load metadata for docker.io/library/nginx:alpine
+ => [1/2] FROM docker.io/library/nginx:alpine
+ => [2/2] COPY index.html /usr/share/nginx/html/index.html
+ => exporting to image
+ => naming to docker.io/library/myapp:v1
+Step 9: Create Kubernetes Deployment
+
+Use this single command:
+
+cat > deployment.yaml <<'EOF'
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: myapp:v1
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+EOF
+
+One-line description: Defines two Kubernetes Pods that run the Docker image.
+
+Output
+
+No output
+Step 10: Deploy the application
+kubectl apply -f deployment.yaml
+
+One-line description: Creates the Kubernetes Deployment.
+
+Output
+
+deployment.apps/myapp created
+
+Verify:
+
+kubectl get deployments
+
+Output
+
+NAME    READY   UP-TO-DATE   AVAILABLE   AGE
+myapp   2/2     2            2           10s
+Step 11: Create and expose the Service
+
+Again, use one command:
+
+cat > service.yaml <<'EOF'
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  type: NodePort
+  selector:
+    app: myapp
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30080
+EOF
+
+One-line description: Creates a NodePort Service to expose the application.
+
+Output
+
+No output
+
+Apply it:
+
+kubectl apply -f service.yaml
+
+One-line description: Creates the Kubernetes Service.
+
+Output
+
+service/myapp-service created
+Step 12: Test the application
+
+This is the most important command for your lab.
+
+curl http://$(minikube ip):30080
+
+One-line description: Sends a request to the application through the Kubernetes Service.
+
+Output
+
+<h1>Hello from Docker and Kubernetes!</h1><p>DevOps Lab Experiment</p>
+
+If you see this, your Docker + Kubernetes integration is working. ✅
+
+Step 13: Final verification
+
+Instead of checking everything separately, remember this:
+
+kubectl get pods,deployments,svc
+
+One-line description: Displays the Pods, Deployment and Service status together.
+
+Expected output
+
+NAME                         READY   STATUS    RESTARTS   AGE
+pod/myapp-xxxxxxxxxx-xxxxx  1/1     Running   0          1m
+pod/myapp-xxxxxxxxxx-xxxxx  1/1     Running   0          1m
+
+NAME                    READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/myapp   2/2     2            2           1m
+
+NAME                   TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)
+service/myapp-service  NodePort   10.xxx.xxx.xxx  <none>        80:30080/TCP
+Step 14: Cleanup
+kubectl delete -f service.yaml && kubectl delete -f deployment.yaml && minikube stop
+
+One-line description: Deletes the Kubernetes resources and stops Minikube.
+
+Output
+
+service "myapp-service" deleted
+deployment.apps "myapp" deleted
+✋  Stopping node "minikube" ...
+🛑  1 node stopped.
+
+
+
+STEPS 
+Step 1: Install Docker
+sudo apt update && sudo apt install docker.io -y
+
+Step 2: Start Docker
+sudo systemctl enable --now docker && docker --version
+
+Step 3: Install kubectl
+sudo snap install kubectl --classic
+
+Verify:
+kubectl version --client
+
+Step 4: Install Minikube
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+Verify:
+minikube version
+
+Step 5: Start Kubernetes
+minikube start --driver=docker
+
+If Docker permission error:
+sudo usermod -aG docker $USER
+
+Log out and log in again, then:
+minikube start --driver=docker
+
+Step 6: Create project folder
+mkdir ~/k8s-docker && cd ~/k8s-docker
+
+Step 7: Create HTML file
+echo '<h1>Hello from Docker and Kubernetes!</h1><p>DevOps Lab Experiment</p>' > index.html
+
+Step 8: Create Dockerfile
+cat > Dockerfile <<'EOF'
+FROM nginx:alpine
+COPY index.html /usr/share/nginx/html/index.html
+EXPOSE 80
+EOF
+
+Step 9: Build Docker image
+minikube image build -t myapp:v1 .
+
+Step 10: Create Kubernetes Deployment
+cat > deployment.yaml <<'EOF'
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: myapp:v1
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+EOF
+
+Step 11: Deploy application
+kubectl apply -f deployment.yaml
+
+Verify:
+kubectl get deployments
+
+Step 12: Create Kubernetes Service
+cat > service.yaml <<'EOF'
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  type: NodePort
+  selector:
+    app: myapp
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30080
+EOF
+
+Step 13: Apply Service
+kubectl apply -f service.yaml
+
+Step 14: Test application
+curl http://$(minikube ip):30080
+
+Step 15: Final verification
+kubectl get pods,deployments,svc
+
+Step 16: Cleanup
+kubectl delete -f service.yaml && kubectl delete -f deployment.yaml && minikube stop
